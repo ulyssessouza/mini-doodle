@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 public record BookRequest(
-        @NotBlank String title,
+        @NotBlank @Size(max = 255) String title,
         @Size(max = 2048) String description,
         @NotEmpty List<ParticipantRequest> participants) {
 }

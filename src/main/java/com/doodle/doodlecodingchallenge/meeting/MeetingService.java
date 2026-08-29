@@ -3,8 +3,10 @@ package com.doodle.doodlecodingchallenge.meeting;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -48,11 +50,11 @@ public class MeetingService {
                 "Slot %s is not available (status %s)".formatted(slotId, slot.getStatus()));
         }
 
-        List<String> emails = request.participants().stream()
-            .map(ParticipantRequest::email)
-            .toList();
-        if (new HashSet<>(emails).size() != emails.size()) {
-            throw new InvalidRequestException("Duplicate participant email in request");
+        Set<String> seen = new HashSet<>();
+        for (ParticipantRequest participant : request.participants()) {
+            if (!seen.add(participant.email().toLowerCase(Locale.ROOT))) {
+                throw new InvalidRequestException("Duplicate participant email in request");
+            }
         }
 
         List<MeetingParticipant> participants = request.participants().stream()
@@ -114,6 +116,7 @@ public class MeetingService {
             .collect(Collectors.toMap(Meeting::getId, m -> m));
         List<MeetingDto> content = ids.getContent().stream()
             .map(byId::get)
+            .filter(Objects::nonNull)
             .map(MeetingDto::from)
             .toList();
         return new PageImpl<>(content, ids.getPageable(), ids.getTotalElements());
