@@ -2,7 +2,7 @@ services:
   app:
     build: .
     ports:
-      - "8081:8080"
+      - "${APP_PORT:-8080}:8080"
     environment:
       POSTGRES_URL: jdbc:postgresql://postgres:5432/doodle
       POSTGRES_USER: doodle
@@ -17,7 +17,7 @@ services:
       POSTGRES_USER: doodle
       POSTGRES_PASSWORD: doodle
     ports:
-      - "5433:5432"
+      - "${DB_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U doodle -d doodle"]
       interval: 5s
