@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import com.doodle.doodlecodingchallenge.common.ConflictException;
 import com.doodle.doodlecodingchallenge.common.InvalidRequestException;
 import com.doodle.doodlecodingchallenge.common.NotFoundException;
+import com.doodle.doodlecodingchallenge.meeting.Meeting;
 import com.doodle.doodlecodingchallenge.slot.dto.CreateSlotRequest;
 import com.doodle.doodlecodingchallenge.slot.dto.SlotDto;
 import com.doodle.doodlecodingchallenge.slot.dto.UpdateSlotRequest;
@@ -72,6 +73,21 @@ class SlotServiceTest {
         assertThat(dto.status()).isEqualTo(SlotStatus.FREE);
         assertThat(dto.meetingId()).isNull();
         verify(slots).save(any(Slot.class));
+    }
+
+    @Test
+    void getReturnsMappedSlot() {
+        Slot slot = new Slot(UUID.randomUUID(), owner, start, end);
+        when(slots.findById(slot.getId())).thenReturn(Optional.of(slot));
+
+        SlotDto dto = service.get(slot.getId());
+
+        assertThat(dto.id()).isEqualTo(slot.getId());
+        assertThat(dto.ownerId()).isEqualTo(owner.getId());
+        assertThat(dto.start()).isEqualTo(start);
+        assertThat(dto.end()).isEqualTo(end);
+        assertThat(dto.status()).isEqualTo(SlotStatus.FREE);
+        assertThat(dto.meetingId()).isNull();
     }
 
     @Test
@@ -129,6 +145,30 @@ class SlotServiceTest {
     }
 
     @Test
+    void markFreeRejectedWhenMeetingLinked() {
+        Slot slot = new Slot(UUID.randomUUID(), owner, start, end);
+        slot.linkMeeting(new Meeting(UUID.randomUUID(), "Standup", null, owner, slot, Instant.now()));
+        when(slots.findById(slot.getId())).thenReturn(Optional.of(slot));
+
+        assertThatThrownBy(() -> service.update(slot.getId(),
+            new UpdateSlotRequest(null, null, SlotStatus.FREE)))
+            .isInstanceOf(ConflictException.class)
+            .hasMessageContaining("cancel the meeting");
+    }
+
+    @Test
+    void rescheduleRejectedWhenMeetingLinked() {
+        Slot slot = new Slot(UUID.randomUUID(), owner, start, end);
+        slot.linkMeeting(new Meeting(UUID.randomUUID(), "Standup", null, owner, slot, Instant.now()));
+        when(slots.findById(slot.getId())).thenReturn(Optional.of(slot));
+
+        assertThatThrownBy(() -> service.update(slot.getId(),
+            new UpdateSlotRequest(start.plusSeconds(3600), end.plusSeconds(3600), null)))
+            .isInstanceOf(ConflictException.class)
+            .hasMessageContaining("only free slots can be rescheduled");
+    }
+
+    @Test
     void manualBusyThenFreeRoundTrip() {
         Slot slot = new Slot(UUID.randomUUID(), owner, start, end);
         when(slots.findById(slot.getId())).thenReturn(Optional.of(slot));
@@ -138,6 +178,17 @@ class SlotServiceTest {
 
         service.update(slot.getId(), new UpdateSlotRequest(null, null, SlotStatus.FREE));
         assertThat(slot.getStatus()).isEqualTo(SlotStatus.FREE);
+    }
+
+    @Test
+    void partialUpdateValidatesRange() {
+        Slot slot = new Slot(UUID.randomUUID(), owner, start, end);
+        when(slots.findById(slot.getId())).thenReturn(Optional.of(slot));
+
+        assertThatThrownBy(() -> service.update(slot.getId(),
+            new UpdateSlotRequest(Instant.parse("2026-09-01T11:30:00Z"), null, null)))
+            .isInstanceOf(InvalidRequestException.class)
+            .hasMessageContaining("end must be after start");
     }
 
     @Test
