@@ -91,9 +91,9 @@ No spring-session-jdbc (no auth) — dependency removed to keep the stack lean.
   becomes `BUSY` and links to the meeting. Rejected (409) if the slot's range
   overlaps any `BUSY` slot of the organizer or of any participant who is a
   registered user.
-- **Calendar view**: `busy` returns the user's booked meetings plus manually
-  busy slots in the frame; `free` returns their `FREE` slots; omitted `status`
-  returns both.
+- **Calendar view**: `busy` returns the user's booked meetings (as organizer),
+  meetings they attend as registered participants, and manually busy slots in
+  the frame; `free` returns their `FREE` slots; omitted `status` returns both.
 - **Cancelling/deleting a meeting** sets its slot back to `FREE`.
 - A user cannot book overlapping time against themselves either — the
   organizer (slot owner) is included in the conflict check.
