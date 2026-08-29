@@ -86,12 +86,17 @@ No spring-session-jdbc (no auth) — dependency removed to keep the stack lean.
   via its meeting or via mark-free).
 - Mark busy/free manually: allowed; marking `BUSY` without a meeting blocks
   that time without creating a meeting.
-- **Booking**: converts a `FREE` slot into a `Meeting`; slot becomes `BUSY`
-  and links to the meeting. Rejected (409) if the slot's range overlaps any
-  `BUSY` slot of the organizer or of any participant who is a registered user.
+- **Booking**: only the slot owner may book their own slot (they become the
+  meeting organizer). Booking converts a `FREE` slot into a `Meeting`; slot
+  becomes `BUSY` and links to the meeting. Rejected (409) if the slot's range
+  overlaps any `BUSY` slot of the organizer or of any participant who is a
+  registered user.
+- **Calendar view**: `busy` returns the user's booked meetings plus manually
+  busy slots in the frame; `free` returns their `FREE` slots; omitted `status`
+  returns both.
 - **Cancelling/deleting a meeting** sets its slot back to `FREE`.
-- A user cannot book their own overlapping slots either — the organizer is
-  included in the conflict check.
+- A user cannot book overlapping time against themselves either — the
+  organizer (slot owner) is included in the conflict check.
 
 ## API design (v1, JSON)
 
