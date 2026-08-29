@@ -22,9 +22,12 @@ public interface MeetingRepository extends JpaRepository<Meeting, UUID> {
     Optional<Meeting> findByIdWithParticipants(@Param("id") UUID id);
 
     @Query("""
-        select distinct m.id from Meeting m
-        join m.participants p
-        where lower(p.email) = lower(:email)
+        select m.id from Meeting m
+        where exists (
+            select 1 from MeetingParticipant p
+            where p.meeting = m
+              and lower(p.email) = lower(:email)
+        )
         """)
     Page<UUID> findIdsByParticipantEmail(@Param("email") String email, Pageable pageable);
 

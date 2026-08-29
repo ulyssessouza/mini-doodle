@@ -128,6 +128,26 @@ class SchedulingFlowTests extends AbstractIntegrationTest {
     }
 
     @Test
+    void participantMeetingListingReturnsBookedMeetings() throws Exception {
+        String alice = registerUser("Alice5", "alice5@example.com");
+        String bob = registerUser("Bob5", "bob5@example.com");
+        String slotId = createSlot(alice, "2026-09-07T10:00:00Z", "2026-09-07T11:00:00Z");
+
+        mockMvc.perform(post("/api/v1/slots/{id}/book", slotId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"title":"Sync","participants":[{"name":"Bob","email":"bob5@example.com"}]}
+                    """))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/meetings").param("participant", "BOB5@example.com"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].title").value("Sync"))
+            .andExpect(jsonPath("$.content[0].slotId").value(slotId));
+    }
+
+    @Test
     void registeredParticipantConflictRejected() throws Exception {
         String alice = registerUser("Alice3", "alice3@example.com");
         String bob = registerUser("Bob3", "bob3@example.com");
