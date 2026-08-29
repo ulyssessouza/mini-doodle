@@ -81,7 +81,7 @@ class CalendarServiceTest {
         when(users.findById(alice.getId())).thenReturn(Optional.of(alice));
         when(slots.findOverlappingWithMeeting(alice.getId(), from, to))
             .thenReturn(List.of(freeSlot, manualBusy, ownMeetingSlot));
-        when(meetings.findMeetingsAttended(alice.getId(), from, to)).thenReturn(List.of(attended));
+        when(meetings.findMeetingsAttended(alice.getId(), from, to)).thenReturn(List.of(attended, ownMeeting));
 
         List<CalendarEntryDto> busy = service.view(alice.getId(), from, to, Optional.of(SlotStatus.BUSY));
         List<CalendarEntryDto> free = service.view(alice.getId(), from, to, Optional.of(SlotStatus.FREE));
