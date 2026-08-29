@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: doodle-coding-challenge
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/doodle}
+    username: ${POSTGRES_USER:doodle}
+    password: ${POSTGRES_PASSWORD:doodle}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
