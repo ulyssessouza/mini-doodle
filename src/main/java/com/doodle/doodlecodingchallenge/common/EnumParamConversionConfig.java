@@ -17,7 +17,9 @@ public class EnumParamConversionConfig implements WebMvcConfigurer {
         registry.addConverter(new Converter<String, SlotStatus>() {
             @Override
             public SlotStatus convert(String source) {
-                return SlotStatus.valueOf(source.toUpperCase(Locale.ROOT));
+                return source == null || source.isBlank()
+                    ? null
+                    : SlotStatus.valueOf(source.toUpperCase(Locale.ROOT));
             }
         });
     }
