@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -63,9 +64,10 @@ class UserServiceTest {
     @Test
     void getUnknownUserThrowsNotFound() {
         UserService service = new UserService(users);
-        when(users.findById(any())).thenReturn(java.util.Optional.empty());
+        UUID unknownId = UUID.randomUUID();
+        when(users.findById(unknownId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.get(UUID.randomUUID()))
+        assertThatThrownBy(() -> service.get(unknownId))
             .isInstanceOf(NotFoundException.class);
     }
 }

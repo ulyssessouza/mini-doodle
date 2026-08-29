@@ -19,6 +19,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmailIgnoreCase(String email);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select u from User u where u.id in :ids")
+    @Query("select u from User u where u.id in :ids order by u.id")
     List<User> findAllByIdForUpdate(@Param("ids") Collection<UUID> ids);
 }
