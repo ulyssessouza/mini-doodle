@@ -12,7 +12,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.doodle.doodlecodingchallenge.common.ConflictException;
 import com.doodle.doodlecodingchallenge.common.InvalidRequestException;
 import com.doodle.doodlecodingchallenge.common.NotFoundException;
+import com.doodle.doodlecodingchallenge.common.PageResponse;
 import com.doodle.doodlecodingchallenge.meeting.dto.BookRequest;
 import com.doodle.doodlecodingchallenge.meeting.dto.MeetingDto;
 import com.doodle.doodlecodingchallenge.meeting.dto.ParticipantRequest;
@@ -106,10 +106,10 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public Page<MeetingDto> findByParticipant(String email, Pageable pageable) {
+    public PageResponse<MeetingDto> findByParticipant(String email, Pageable pageable) {
         Page<UUID> ids = meetings.findIdsByParticipantEmail(email, pageable);
         if (ids.isEmpty()) {
-            return Page.empty(pageable);
+            return PageResponse.from(Page.empty(pageable));
         }
         Map<UUID, Meeting> byId = meetings.findAllWithParticipantsById(ids.getContent())
             .stream()
@@ -119,6 +119,7 @@ public class MeetingService {
             .filter(Objects::nonNull)
             .map(MeetingDto::from)
             .toList();
-        return new PageImpl<>(content, ids.getPageable(), ids.getTotalElements());
+        return new PageResponse<>(content, ids.getNumber(), ids.getSize(),
+            ids.getTotalElements(), ids.getTotalPages());
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.doodle.doodlecodingchallenge.common.PageResponse;
 import com.doodle.doodlecodingchallenge.meeting.dto.MeetingDto;
 
 @WebMvcTest(MeetingController.class)
@@ -33,13 +34,14 @@ class MeetingControllerTest {
     void byParticipantReturnsPagedMeetings() throws Exception {
         UUID meetingId = UUID.randomUUID();
         when(meetingService.findByParticipant(any(), any())).thenReturn(
-            new PageImpl<>(List.of(new MeetingDto(meetingId, "Sync", null,
+            PageResponse.from(new PageImpl<>(List.of(new MeetingDto(meetingId, "Sync", null,
                 UUID.randomUUID(), UUID.randomUUID(),
                 Instant.parse("2026-09-01T10:00:00Z"), Instant.parse("2026-09-01T11:00:00Z"),
-                Instant.now(), List.of())), PageRequest.of(0, 20), 1));
+                Instant.now(), List.of())), PageRequest.of(0, 20), 1)));
 
         mockMvc.perform(get("/api/v1/meetings").param("participant", "bob@example.com"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content[0].id").value(meetingId.toString()));
+            .andExpect(jsonPath("$.content[0].id").value(meetingId.toString()))
+            .andExpect(jsonPath("$.totalElements").value(1));
     }
 }

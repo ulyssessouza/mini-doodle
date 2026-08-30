@@ -155,8 +155,11 @@ class MeetingServiceTest {
 
         var result = service.findByParticipant("bob@example.com", PageRequest.of(0, 20));
 
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).id()).isEqualTo(id1);
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().get(0).id()).isEqualTo(id1);
+        assertThat(result.page()).isZero();
+        assertThat(result.size()).isEqualTo(20);
+        assertThat(result.totalElements()).isEqualTo(2);
     }
 
     @Test

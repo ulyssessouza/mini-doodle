@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.doodle.doodlecodingchallenge.common.ConflictException;
 import com.doodle.doodlecodingchallenge.common.InvalidRequestException;
 import com.doodle.doodlecodingchallenge.common.NotFoundException;
+import com.doodle.doodlecodingchallenge.common.PageResponse;
 import com.doodle.doodlecodingchallenge.slot.dto.CreateSlotRequest;
 import com.doodle.doodlecodingchallenge.slot.dto.SlotDto;
 import com.doodle.doodlecodingchallenge.slot.dto.UpdateSlotRequest;
@@ -39,14 +40,14 @@ public class SlotService {
     }
 
     @Transactional(readOnly = true)
-    public Page<SlotDto> list(UUID ownerId, Instant from, Instant to,
-                              Optional<SlotStatus> status, Pageable pageable) {
+    public PageResponse<SlotDto> list(UUID ownerId, Instant from, Instant to,
+                                      Optional<SlotStatus> status, Pageable pageable) {
         Page<Slot> page = status
             .map(s -> slots.findByOwnerIdAndStatusAndEndsAtGreaterThanAndStartsAtLessThan(
                 ownerId, s, from, to, pageable))
             .orElseGet(() -> slots.findByOwnerIdAndEndsAtGreaterThanAndStartsAtLessThan(
                 ownerId, from, to, pageable));
-        return page.map(SlotDto::from);
+        return PageResponse.from(page.map(SlotDto::from));
     }
 
     @Transactional(readOnly = true)

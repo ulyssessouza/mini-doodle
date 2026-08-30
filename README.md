@@ -103,8 +103,9 @@ curl -s "localhost:8080/api/v1/users/<aliceId>/slots?from=2026-09-01T00:00:00Z&t
 ```
 
 `from`/`to` are required ISO-8601 instants; `status` (`FREE`/`BUSY`) is
-optional and matched case-insensitively (a blank value means no filter). The
-result is a paginated `Page` of slots.
+optional and matched case-insensitively (a blank value means no filter).
+Pagination uses `page`/`size`/`sort` query params and returns a stable
+envelope: `{"content":[...],"page":0,"size":50,"totalElements":n,"totalPages":n}`.
 
 ### 4. Modify a slot (reschedule / mark busy or free)
 
