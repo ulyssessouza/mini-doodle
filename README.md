@@ -206,7 +206,8 @@ All errors use RFC 7807 `application/problem+json`:
 - **Concurrency:** booking pessimistically locks the involved user rows
   (`SELECT … FOR UPDATE` in a stable id order) inside the booking transaction,
   then re-checks an indexed overlap query with a locking read — two concurrent
-  overlapping bookings cannot both succeed; the loser gets `409`.
+  overlapping bookings cannot both succeed; the loser gets `409`. See
+  *Why pessimistic locking for booking?* below for the rationale.
 - **Performance:** range queries hit the index `(owner_id, start_at, end_at)`;
   the calendar view is one or two indexed queries per user (own slots plus
   attended meetings); participants are
@@ -219,3 +220,37 @@ All errors use RFC 7807 `application/problem+json`:
   rejected.
 - Design decisions and rejected alternatives: see
   `docs/superpowers/specs/2026-08-29-doodle-scheduling-service-design.md`.
+
+### Why pessimistic locking for booking?
+
+Booking is a check-then-act sequence: read the target slot (must be `FREE`),
+check overlapping busy time of everyone involved, then mark the slot `BUSY`
+and insert the meeting. The conflict is **not a lost update on one row** — it
+is a range-overlap conflict *across many rows*, so optimistic version checks
+cannot enforce it:
+
+- `@Version` on **Slot** only detects two writers of the *same* slot row. Two
+  bookings of *different* slots that share a participant both pass version
+  checks and would double-book that participant.
+- An optimistic `@Version` on **User** would work only by force-writing every
+  involved user's row on each booking: the loser discovers the conflict at
+  flush time and needs a retry loop, and every booking pollutes user write
+  sets.
+
+`SELECT … FOR UPDATE` on the involved user rows (ordered by id — a stable
+global order, so concurrent bookings cannot deadlock) makes any two bookings
+sharing a user run one after the other. The overlap re-check runs *after* the
+locks are held, so the loser sees the winner's committed `BUSY` slot and gets
+a clean `409` ("overlaps existing busy time for: …") — deterministic
+`201 + 409`, no client retries. Locks are held only for the short critical
+section (a few indexed queries + one insert), so read traffic is unaffected.
+
+Alternatives considered: **SERIALIZABLE isolation** (same guarantee, but
+conflicts surface as SQLSTATE 40001 requiring whole-transaction retry
+machinery) and a PostgreSQL **`tstzrange` + `EXCLUDE USING gist`** constraint
+(bulletproof integrity, but fights JPA and cannot express "check the
+organizer and all registered participants" cleanly).
+
+Optimistic locking is still used where it fits: `@Version` on **Slot** guards
+row-local races (concurrent PATCH/DELETE of the same slot → `409` "modified
+concurrently; retry").
