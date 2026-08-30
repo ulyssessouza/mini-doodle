@@ -92,7 +92,7 @@ public class Meeting implements Persistable<UUID> {
     }
 
     public List<MeetingParticipant> getParticipants() {
-        return participants;
+        return List.copyOf(participants);
     }
 
     public Instant getCreatedAt() {

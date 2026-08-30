@@ -83,7 +83,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         String name = ex instanceof MethodArgumentTypeMismatchException mismatch
             ? mismatch.getName()
             : ex.getPropertyName();
-        return respond(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid value for: " + name);
+        return respond(HttpStatus.BAD_REQUEST, "Invalid request",
+            "Invalid value for: " + (name != null ? name : "request value"));
     }
 
     @Override
