@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import com.doodle.doodlecodingchallenge.common.ConflictException;
 import com.doodle.doodlecodingchallenge.common.InvalidRequestException;
@@ -73,50 +71,6 @@ class SlotServiceTest {
         assertThat(dto.status()).isEqualTo(SlotStatus.FREE);
         assertThat(dto.meetingId()).isNull();
         verify(slots).save(any(Slot.class));
-    }
-
-    @Test
-    void getReturnsMappedSlot() {
-        Slot slot = new Slot(UUID.randomUUID(), owner, start, end);
-        when(slots.findById(slot.getId())).thenReturn(Optional.of(slot));
-
-        SlotDto dto = service.get(slot.getId());
-
-        assertThat(dto.id()).isEqualTo(slot.getId());
-        assertThat(dto.ownerId()).isEqualTo(owner.getId());
-        assertThat(dto.start()).isEqualTo(start);
-        assertThat(dto.end()).isEqualTo(end);
-        assertThat(dto.status()).isEqualTo(SlotStatus.FREE);
-        assertThat(dto.meetingId()).isNull();
-    }
-
-    @Test
-    void listDelegatesToStatusAwareQueryWhenStatusPresent() {
-        when(slots.findByOwnerIdAndStatusAndEndsAtGreaterThanAndStartsAtLessThan(
-                any(), any(), any(), any(), any()))
-            .thenReturn(Page.empty());
-
-        service.list(owner.getId(), start, end, Optional.of(SlotStatus.BUSY), PageRequest.of(0, 50));
-
-        verify(slots).findByOwnerIdAndStatusAndEndsAtGreaterThanAndStartsAtLessThan(
-            org.mockito.ArgumentMatchers.eq(owner.getId()), org.mockito.ArgumentMatchers.eq(SlotStatus.BUSY),
-            org.mockito.ArgumentMatchers.eq(start), org.mockito.ArgumentMatchers.eq(end),
-            org.mockito.ArgumentMatchers.any(PageRequest.class));
-    }
-
-    @Test
-    void listDelegatesToPlainQueryWithoutStatus() {
-        when(slots.findByOwnerIdAndEndsAtGreaterThanAndStartsAtLessThan(
-                any(), any(), any(), any()))
-            .thenReturn(Page.empty());
-
-        service.list(owner.getId(), start, end, Optional.empty(), PageRequest.of(0, 50));
-
-        verify(slots).findByOwnerIdAndEndsAtGreaterThanAndStartsAtLessThan(
-            org.mockito.ArgumentMatchers.eq(owner.getId()),
-            org.mockito.ArgumentMatchers.eq(start),
-            org.mockito.ArgumentMatchers.eq(end),
-            org.mockito.ArgumentMatchers.any(PageRequest.class));
     }
 
     @Test

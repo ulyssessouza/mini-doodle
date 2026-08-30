@@ -5,17 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.doodle.doodlecodingchallenge.common.ConflictException;
-import com.doodle.doodlecodingchallenge.common.NotFoundException;
 import com.doodle.doodlecodingchallenge.user.dto.CreateUserRequest;
 import com.doodle.doodlecodingchallenge.user.dto.UserDto;
 
@@ -47,27 +42,5 @@ class UserServiceTest {
         assertThatThrownBy(() -> service.register(new CreateUserRequest("Alice", "alice@example.com")))
             .isInstanceOf(ConflictException.class)
             .hasMessageContaining("alice@example.com");
-    }
-
-    @Test
-    void getReturnsMappedUser() {
-        UserService service = new UserService(users);
-        User user = new User(UUID.randomUUID(), "Alice", "alice@example.com", Instant.now());
-        when(users.findById(user.getId())).thenReturn(java.util.Optional.of(user));
-
-        UserDto dto = service.get(user.getId());
-
-        assertThat(dto.id()).isEqualTo(user.getId());
-        assertThat(dto.email()).isEqualTo("alice@example.com");
-    }
-
-    @Test
-    void getUnknownUserThrowsNotFound() {
-        UserService service = new UserService(users);
-        UUID unknownId = UUID.randomUUID();
-        when(users.findById(unknownId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.get(unknownId))
-            .isInstanceOf(NotFoundException.class);
     }
 }

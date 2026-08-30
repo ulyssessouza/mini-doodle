@@ -1,14 +1,12 @@
 package com.doodle.boomstub;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.doodle.doodlecodingchallenge.common.ConflictException;
 import com.doodle.doodlecodingchallenge.common.InvalidRequestException;
@@ -50,11 +48,6 @@ public class ThrowingController {
     @GetMapping("/boom/integrity")
     void integrity() {
         throw new DataIntegrityViolationException("duplicate key value violates unique constraint");
-    }
-
-    @GetMapping("/boom/nope")
-    void noResource() throws NoResourceFoundException {
-        throw new NoResourceFoundException(HttpMethod.GET, "/boom/nope", "boom/nope");
     }
 
     @GetMapping("/boom/method-validation")

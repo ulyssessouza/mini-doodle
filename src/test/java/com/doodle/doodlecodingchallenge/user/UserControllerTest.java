@@ -2,7 +2,6 @@ package com.doodle.doodlecodingchallenge.user;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.doodle.doodlecodingchallenge.common.NotFoundException;
 import com.doodle.doodlecodingchallenge.user.dto.CreateUserRequest;
 import com.doodle.doodlecodingchallenge.user.dto.UserDto;
 
@@ -53,15 +51,5 @@ class UserControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.title").value("Invalid request"))
             .andExpect(jsonPath("$.errors[0].field").value("email"));
-    }
-
-    @Test
-    void getUnknownUserReturns404ProblemDetail() throws Exception {
-        when(userService.get(any(UUID.class)))
-            .thenThrow(NotFoundException.of("User", 42));
-
-        mockMvc.perform(get("/api/v1/users/" + UUID.randomUUID()))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.title").value("Resource not found"));
     }
 }

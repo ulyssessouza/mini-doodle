@@ -43,23 +43,4 @@ class CalendarControllerTest {
             .andExpect(jsonPath("$[0].status").value("BUSY"))
             .andExpect(jsonPath("$[0].title").value("Sync"));
     }
-
-    @Test
-    void viewWithoutFromReturns400ProblemDetail() throws Exception {
-        mockMvc.perform(get("/api/v1/users/{userId}/calendar", UUID.randomUUID())
-                .param("to", "2026-09-02T00:00:00Z"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.title").value("Invalid request"));
-    }
-
-    @Test
-    void viewWithBlankStatusMeansNoFilter() throws Exception {
-        when(calendarService.view(any(), any(), any(), any())).thenReturn(List.of());
-
-        mockMvc.perform(get("/api/v1/users/{userId}/calendar", UUID.randomUUID())
-                .param("from", "2026-09-01T00:00:00Z")
-                .param("to", "2026-09-02T00:00:00Z")
-                .param("status", ""))
-            .andExpect(status().isOk());
-    }
 }

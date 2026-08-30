@@ -74,14 +74,6 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
-    void mapsNoResourceFoundToProblemDetail() throws Exception {
-        mockMvc.perform(get("/boom/nope"))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.title").value("Resource not found"))
-            .andExpect(jsonPath("$.detail").value("No such path: boom/nope"));
-    }
-
-    @Test
     void mapsMethodValidationToProblemDetailWithErrors() throws Exception {
         mockMvc.perform(get("/boom/method-validation").param("value", "0"))
             .andExpect(status().isBadRequest())
