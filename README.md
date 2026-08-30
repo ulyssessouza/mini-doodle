@@ -208,9 +208,14 @@ All errors use RFC 7807 `application/problem+json`:
   then re-checks an indexed overlap query with a locking read — two concurrent
   overlapping bookings cannot both succeed; the loser gets `409`.
 - **Performance:** range queries hit the index `(owner_id, start_at, end_at)`;
-  the calendar view is a single indexed query per user; participants are
+  the calendar view is one or two indexed queries per user (own slots plus
+  attended meetings); participants are
   fetched with join-fetch (no N+1); list endpoints are paginated.
 - **Emails:** uniqueness and lookups are case-insensitive (unique index on
   `lower(email)` in the database, case-insensitive repository queries).
+- **Manual busy/free:** only *booking* is conflict-checked. Manually marking a
+  slot busy/free is intentionally not checked against other busy time, so a
+  user may hold overlapping busy slots; booking against that time is still
+  rejected.
 - Design decisions and rejected alternatives: see
   `docs/superpowers/specs/2026-08-29-doodle-scheduling-service-design.md`.
