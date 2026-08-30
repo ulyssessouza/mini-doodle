@@ -51,14 +51,6 @@ public class MeetingParticipant {
         this.meeting = meeting;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public Meeting getMeeting() {
-        return meeting;
-    }
-
     public String getDisplayName() {
         return displayName;
     }
