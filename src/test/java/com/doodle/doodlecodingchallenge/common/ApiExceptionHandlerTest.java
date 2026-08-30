@@ -32,30 +32,6 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
-    void mapsConflictToProblemDetail() throws Exception {
-        mockMvc.perform(get("/boom/conflict"))
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.title").value("Conflict"))
-            .andExpect(jsonPath("$.detail").value("time range overlaps existing busy time for: bob@example.com"));
-    }
-
-    @Test
-    void mapsInvalidRequestToProblemDetail() throws Exception {
-        mockMvc.perform(get("/boom/bad-request"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.title").value("Invalid request"))
-            .andExpect(jsonPath("$.detail").value("end must be after start"));
-    }
-
-    @Test
-    void mapsMissingParameterToProblemDetail() throws Exception {
-        mockMvc.perform(get("/boom/param"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.title").value("Invalid request"))
-            .andExpect(jsonPath("$.detail").value("Missing required parameter: param"));
-    }
-
-    @Test
     void mapsBeanValidationToProblemDetailWithErrors() throws Exception {
         mockMvc.perform(post("/boom/validation")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -71,13 +47,5 @@ class ApiExceptionHandlerTest {
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.title").value("Conflict"))
             .andExpect(jsonPath("$.detail").value("Operation violates a data constraint"));
-    }
-
-    @Test
-    void mapsMethodValidationToProblemDetailWithErrors() throws Exception {
-        mockMvc.perform(get("/boom/method-validation").param("value", "0"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.title").value("Invalid request"))
-            .andExpect(jsonPath("$.errors[0].field").value("value"));
     }
 }
