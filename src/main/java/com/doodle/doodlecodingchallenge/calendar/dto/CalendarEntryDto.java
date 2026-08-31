@@ -6,7 +6,9 @@ import java.util.UUID;
 import com.doodle.doodlecodingchallenge.meeting.Meeting;
 import com.doodle.doodlecodingchallenge.slot.Slot;
 import com.doodle.doodlecodingchallenge.slot.SlotStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(name = "CalendarEntry")
 public record CalendarEntryDto(
         UUID slotId,
         Instant start,
